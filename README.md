@@ -13,6 +13,7 @@ Centralized notes on my Artificial Intelligence learnings: frameworks, protocols
   - [MCP (Model Context Protocol)](./protocols/mcp.md)
 - [Skills](./skills/README.md)
 - [Proposals](./proposals/README.md)
+- [Experiments](./experiments/README.md)
 - [Papers](./papers/README.md)
 
 ## Conventions
