@@ -34,4 +34,9 @@ Paper notes and short summaries, organized by topic folders.
     - Summary: [`Scrum/ai-hire-whitepaper-scrumorg-2025.md`](./Scrum/ai-hire-whitepaper-scrumorg-2025.md)
     - PDF: [`Scrum/AI Hire - Whitepaper.pdf`](./Scrum/AI%20Hire%20-%20Whitepaper.pdf)
 
+- **Observability (LLM agents)**
+  - AGENTOPS: Enabling Observability of LLM Agents (Dong et al., 2024)
+    - Summary: [`Observability/agentops-enabling-observability-of-llm-agents-dong-lu-zhu-2024.md`](./Observability/agentops-enabling-observability-of-llm-agents-dong-lu-zhu-2024.md)
+    - PDF: [`Observability/ENABLING OBSERVABILITY OF LLM AGENTS.pdf`](./Observability/ENABLING%20OBSERVABILITY%20OF%20LLM%20AGENTS.pdf)
+
 
