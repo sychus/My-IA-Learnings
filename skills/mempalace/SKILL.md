@@ -58,30 +58,39 @@ Wait until the process exits cleanly before continuing.
 
 ### Phase 4 — Register as MCP server in Claude Code
 
-Read the current `~/.claude/claude.json`:
+> **Do not hand-edit the config file.** Claude Code's global config lives at `~/.claude.json` (in the home directory, with a leading dot) — **not** `~/.claude/claude.json`. That file is large (it holds all project and session history), so editing it by hand risks corrupting it. Use the official CLI, which edits it safely.
+
+Register the server with `claude mcp add-json` at user scope:
 
 ```bash
-cat ~/.claude/claude.json
+claude mcp add-json --scope user mempalace '{"type":"stdio","command":"docker","args":["run","-i","--rm","-v","mempalace-data:/data","mempalace"]}'
 ```
 
-Add `mempalace` to the `mcpServers` block. The final entry must look exactly like this:
+> **Critical:** the `-i` flag is required — JSON-RPC needs stdin. Without it the server silently fails.
+
+If the `claude` CLI is not on PATH, fall back to editing `~/.claude.json` directly. Add the entry below to the top-level `mcpServers` object, then validate:
 
 ```json
 "mempalace": {
+  "type": "stdio",
   "command": "docker",
   "args": ["run", "-i", "--rm", "-v", "mempalace-data:/data", "mempalace"]
 }
 ```
 
-> **Critical:** the `-i` flag is required — JSON-RPC needs stdin. Without it the server silently fails.
-
-After editing, validate the JSON is well-formed:
-
 ```bash
-python3 -m json.tool ~/.claude/claude.json > /dev/null && echo "valid" || echo "INVALID JSON"
+python3 -m json.tool ~/.claude.json > /dev/null && echo "valid" || echo "INVALID JSON"
 ```
 
 If invalid, fix it before continuing.
+
+Confirm the registration landed:
+
+```bash
+claude mcp list 2>/dev/null | rg mempalace || rg -A4 '"mempalace"' ~/.claude.json
+```
+
+If `mempalace` does not appear, **stop and report** — the rest of the setup is pointless until this is registered.
 
 ---
 
@@ -102,14 +111,15 @@ This is idempotent — safe to run multiple times. Large transcript collections 
 
 ### Phase 6 — Verify the MCP server is reachable
 
-Test that the container starts and responds correctly:
+Test that the container starts and responds correctly. This pipes a JSON-RPC `initialize` and checks for `"result"` in the reply, failing loudly if it is missing:
 
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"0.0.1"}}}' \
-  | docker run -i --rm -v mempalace-data:/data mempalace
+  | docker run -i --rm -v mempalace-data:/data mempalace \
+  | rg -q '"result"' && echo "MCP server OK ✓" || echo "MCP server FAILED ✗ — do not tell the user it works"
 ```
 
-A valid response contains `"result"` in the output. If you see JSON back, the server is working.
+If you see `FAILED`, **stop and report** — do not proceed to Phase 7 claiming success.
 
 Tell the user to open a new Claude Code session and run `/mcp` — `mempalace` should appear as connected with its tools listed.
 
